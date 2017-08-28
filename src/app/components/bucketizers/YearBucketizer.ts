@@ -17,7 +17,7 @@ import {Bucketizer} from './Bucketizer';
  */
 
 export class YearBucketizer extends Bucketizer {
-    public static readonly GRANULARITY = 'year';
+    public static readonly GRANULARITY = 'Year';
 
     constructor() {
         super(YearBucketizer.GRANULARITY);

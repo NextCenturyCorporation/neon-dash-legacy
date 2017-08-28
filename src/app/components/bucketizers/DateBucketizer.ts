@@ -17,8 +17,8 @@ import {Bucketizer} from './Bucketizer';
  */
 
 export class DateBucketizer extends Bucketizer {
-    public static readonly DAY: string = 'day';
-    public static readonly HOUR: string = 'hour';
+    public static readonly DAY: string = 'Day';
+    public static readonly HOUR: string = 'Hour';
     // Cache the number of milliseconds in an hour for processing.
     public static readonly MILLIS_IN_HOUR: number = 1000 * 60 * 60;
     public static readonly MILLIS_IN_DAY: number = DateBucketizer.MILLIS_IN_HOUR * 24;

@@ -1,10 +1,8 @@
-/// <reference path="../../../../node_modules/@types/d3/index.d.ts" />
 import * as _ from 'lodash';
+import * as d3 from 'd3';
 import {ElementRef} from '@angular/core';
 import {TimelineComponent} from './timeline.component';
 import {Bucketizer} from '../bucketizers/Bucketizer';
-
-declare let d3;
 
 const DEFAULT_MARGIN = 15;
 const DEFAULT_HEIGHT = 150;
@@ -62,6 +60,7 @@ export class TimelineSelectorChart {
     private element: ElementRef;
 
     private brushHandler: Function = undefined;
+    private brushArea: d3.Selection<any, TimelineItem, any, any>;
     // private hoverListener = undefined;
     private data: TimelineData;
     private dateFormats = {
@@ -81,8 +80,8 @@ export class TimelineSelectorChart {
     };
 
     private xDomain: Date[] = [];
-    private xAxisFocus: d3.svg.Axis;
-    private svg: d3.Selection<TimelineItem>;
+    private xAxisFocus: d3.Axis<any>;
+    private svg: d3.Selection<any, TimelineItem, any, any>;
 
     // The highlight bars for each date for both the context and focus timelines.
     private focusHighlight;
@@ -95,13 +94,13 @@ export class TimelineSelectorChart {
     // The data index over which the user is currently hovering changed on mousemove and mouseout.
     private hoverIndex = -1;
 
-    private brush: d3.svg.Brush<TimelineItem>;
+    private brush: d3.BrushBehavior<TimelineItem>;
 
     private width = DEFAULT_WIDTH;
     private approximateBarWidth: number;
-    private xFocus: d3.time.Scale<Date, any>;
-    private yFocus: d3.time.Scale<Date, any>;
-    private xContext: d3.time.Scale<Date, any>;
+    private xFocus: d3.ScaleTime<number, any>;
+    private yFocus: d3.ScaleTime<number, any>;
+    private xContext: d3.ScaleTime<number, any>;
     private yContext: any;
     private heightFocus: number;
 
@@ -111,7 +110,7 @@ export class TimelineSelectorChart {
         this.tlComponent = tlComponent;
         this.element = element;
         this.data = data;
-        this.svg = d3.select(this.element.nativeElement);
+        this.svg = d3.select<any, TimelineItem>(this.element.nativeElement);
 
         this.marginFocus = {
                 top: 0,
@@ -185,7 +184,10 @@ export class TimelineSelectorChart {
     }
 
     addBrushHandler(handler?: Function): void {
-        this.brush.on('brushend', () => {
+        this.brushHandler = handler;
+    }
+
+    brushEnd() {
             if (this.brush) {
                 // If the user clicks on a date inside the brush without moving the brush, change the brush to contain only that date.
                 if (this.hoverIndex >= 0 && this.oldExtent[0]) {
@@ -194,20 +196,19 @@ export class TimelineSelectorChart {
                         let startDate: Date = this.data.data[0].data[this.hoverIndex].date;
                         let endDate: Date = this.data.data[0].data.length === this.hoverIndex + 1 ? this.xDomain[1] :
                             this.data.data[0].data[this.hoverIndex + 1].date;
-                        this.brush.extent([startDate.getTime(), endDate.getTime()]);
+                    this.brush.extent([startDate.getTime(), endDate.getTime()] as any);
                     }
                 }
-                if (handler) {
-                    handler(this.brush.extent());
+            if (this.brushHandler) {
+                this.brushHandler(this.brush.extent());
                 }
             }
-        });
     }
 
     clearBrush(): void {
         this.data.extent = [];
         this.oldExtent = [];
-        this.brush.clear();
+        this.brushArea.call(this.brush.move, null);
         d3.select(this.element.nativeElement).select('.brush').call(this.brush);
         if (this.data.data.length && this.data.data[0].data) {
             this.render();
@@ -265,17 +266,18 @@ export class TimelineSelectorChart {
         }
 
         // Setup the axes and their scales.
-        this.xFocus = d3.time.scale.utc().range([0, this.width]);
-        this.xContext = d3.time.scale.utc().range([0, this.width]);
+        this.xFocus = d3.scaleUtc().range([0, this.width]);
+        this.xContext = d3.scaleUtc().range([0, this.width]);
 
         // Save the brush as an instance variable to allow interaction on it by client code.
-        this.brush = d3.svg.brush().x(this.xContext).on('brush', () => {
-            this.updateMask();
+        this.brush = d3.brushX().extent([[0, this.width], [0, this.width]])
+        this.brush.on('end', () => {
+            this.brushEnd();
         });
 
         if (this.brushHandler) {
-            this.brush.on('brushstart', () => {
-                this.oldExtent = this.brush.extent();
+            this.brush.on('start', () => {
+                this.oldExtent = this.brush.extent() as any;
             });
             this.addBrushHandler(this.brushHandler);
         }
@@ -299,7 +301,7 @@ export class TimelineSelectorChart {
             return d ? d.date : -1;
         }));
         let xMax = d3.max(fullDataSet.map((d) => {
-            return d ? d3.time[this.data.granularity].utc.offset(d.date, 1) : -1;
+            return d ? d3['utc' + this.data.granularity].offset(d.date, 1) : -1;
         }));
 
         this.xDomain = [xMin || new Date(), xMax || new Date()];
@@ -312,15 +314,16 @@ export class TimelineSelectorChart {
         this.xFocus.domain(xFocusDomain);
         this.xContext.domain(this.xDomain);
 
-        this.xAxisFocus = d3.svg.axis().scale(this.xFocus).orient('bottom');
-        let xAxisContext = d3.svg.axis().scale(this.xContext).orient('bottom');
+        this.xAxisFocus = d3.axisBottom(this.xFocus);
+        let xAxisContext = d3.axisBottom(this.xContext);
 
         // We don't want the ticks to be too close together, so calculate the most ticks that
         // comfortably fit on the timeline
         let maximumNumberOfTicks = Math.round(this.width / 100);
         // We don't want to have more ticks than buckets (e.g., monthly buckets with daily ticks
         // look funny)
-        let minimumTickRange = d3.time[this.data.granularity].utc.range;
+        /*
+        let minimumTickRange = d3['utc' + this.data.granularity].range(this.xDomain[0], this.xDomain[1]).count();
         // Get number of ticks for the focus chart
         if (this.xFocus.ticks(minimumTickRange).length < maximumNumberOfTicks) {
             // There's enough room to do one tick per bucket
@@ -339,6 +342,7 @@ export class TimelineSelectorChart {
             // Note that D3 may give us a few more ticks than we specify if it feels like it.
             xAxisContext.ticks(maximumNumberOfTicks);
         }
+        */
 
         // Clear the old contents by replacing innerhtml
         // Make sure that the tooltip container is present
@@ -348,7 +352,7 @@ export class TimelineSelectorChart {
         let xCenterOffset = 0;
 
         // Append our chart graphics
-        this.svg = d3.select(this.element.nativeElement).attr('class', 'timeline-selector-chart')
+        this.svg = d3.select<any, TimelineItem>(this.element.nativeElement).attr('class', 'timeline-selector-chart')
             .append('svg')
             .attr('height', svgHeight + (2 * DEFAULT_MARGIN))
             .attr('width', this.width + (2 * DEFAULT_MARGIN));
@@ -426,8 +430,8 @@ export class TimelineSelectorChart {
                 });
 
             // Calculate the max height based on the whole series
-            let yFocus = this.data.logarithmic ? d3.scale.log().clamp(true).range([this.heightFocus, 0]) :
-                d3.scale.linear().range([this.heightFocus, 0]);
+            let yFocus = this.data.logarithmic ? d3.scaleLog().clamp(true).range([this.heightFocus, 0]) :
+                d3.scaleLinear().range([this.heightFocus, 0]);
 
             // Use lowest value or 0 for Y-axis domain, whichever is less (e.g. if negative)
             let minY = d3.min(series.data.map((d: any) => {
@@ -443,13 +447,13 @@ export class TimelineSelectorChart {
 
             yFocus.domain([minY, maxY]);
 
-            let yAxis = d3.svg.axis().scale(yFocus).orient('right').ticks(2);
+            let yAxis = d3.axisRight(yFocus).ticks(2);
 
             // Draw the focus chart
             this.drawFocusChart(series);
 
             let yContext = this.data.logarithmic ?
-                d3.scale.log().clamp(true).range([heightContext, 0]) : d3.scale.linear().range([heightContext, 0]);
+                d3.scaleLog().clamp(true).range([heightContext, 0]) : d3.scaleLinear().range([heightContext, 0]);
             yContext.domain(yFocus.domain());
 
             if (this.data.primarySeries.name === series.name) {
@@ -490,7 +494,7 @@ export class TimelineSelectorChart {
                             return this.xContext(d.date);
                         })
                         .attr('width', (d) => {
-                            return this.xContext(d3.time[this.data.granularity].utc.offset(d.date, 1)) - this.xContext(d.date);
+                            return this.xContext(d3['utc' + this.data.granularity].offset(d.date, 1)) - this.xContext(d.date);
                         })
                         .attr('y', (d) => {
                             return yContext(Math.max(MIN_VALUE, d.value));
@@ -503,7 +507,7 @@ export class TimelineSelectorChart {
                 } else {
                     // If type is line, render a line plot
                     if (series.type === 'line') {
-                        chartTypeContext = d3.svg.line()
+                        chartTypeContext = d3.line()
                             .x((d: any) => {
                                 return this.xContext(d.date);
                             })
@@ -513,7 +517,7 @@ export class TimelineSelectorChart {
                     } else {
                         // Otherwise, default to area, e.g. for bars whose data is too long
                         style += 'fill:' + series.color + ';';
-                        chartTypeContext = d3.svg.area()
+                        chartTypeContext = d3.area()
                             .x((d: any) => {
                                 return this.xContext(d.date);
                             })
@@ -565,7 +569,7 @@ export class TimelineSelectorChart {
                     x2: this.width - (xOffset * 2),
                     y1: yFocus(MIN_VALUE),
                     y2: yFocus(MIN_VALUE)
-                });
+                } as any);
 
             charts.push({
                 name: series.name,
@@ -593,7 +597,7 @@ export class TimelineSelectorChart {
             }
         }
 
-        let gBrush = context.append('g')
+        this.brushArea = context.append('g')
             .attr('class', 'brush')
             .on('mousemove', () => {
                 let index = this.findHoverIndexInData(this.data.primarySeries.data, this.xContext);
@@ -605,34 +609,36 @@ export class TimelineSelectorChart {
                 this.onHoverEnd();
             });
 
-        gBrush.append('rect')
+        this.brushArea.append('rect')
             .attr('x', this.width + DEFAULT_MARGIN)
             .attr('y', -6)
             .attr('width', this.width)
             .attr('height', heightContext + 7)
             .attr('class', 'mask mask-east');
 
-        gBrush.append('rect')
+        this.brushArea.append('rect')
             .attr('x', (0 - (this.width + DEFAULT_MARGIN)))
             .attr('y', -6)
             .attr('width', this.width)
             .attr('height', heightContext + 7)
             .attr('class', 'mask mask-west');
 
-        gBrush.call(this.brush);
+        this.brushArea.call(this.brush.on('brush', () => {
+            this.updateMask();
+        }));
 
-        gBrush.selectAll('rect')
+        this.brushArea.selectAll('rect')
             .attr('y', -6)
             .attr('height', heightContext + 7);
 
-        gBrush.selectAll('.e')
+        this.brushArea.selectAll('.e')
             .append('rect')
             .attr('y', -6)
             .attr('width', 1)
             .attr('height', heightContext + 6)
             .attr('class', 'resize-divider');
 
-        gBrush.selectAll('.w')
+        this.brushArea.selectAll('.w')
             .append('rect')
             .attr('x', -1)
             .attr('y', -6)
@@ -640,7 +646,7 @@ export class TimelineSelectorChart {
             .attr('height', heightContext + 6)
             .attr('class', 'resize-divider');
 
-        gBrush.selectAll('.resize')
+        this.brushArea.selectAll('.resize')
             .append('path')
             .attr('d', resizePath);
 
@@ -677,11 +683,11 @@ export class TimelineSelectorChart {
 
         let focus = this.svg.select('.focus-' + series.name + ' .' + series.name);
 
-        let yFocus = this.data.logarithmic ? d3.scale.log().clamp(true).range([this.heightFocus, 0]) :
-            d3.scale.linear().range([this.heightFocus, 0]);
+        let yFocus = this.data.logarithmic ? d3.scaleLog().clamp(true).range([this.heightFocus, 0]) :
+            d3.scaleLinear().range([this.heightFocus, 0]);
 
         if (this.data.primarySeries.name === series.name) {
-            this.yFocus = yFocus;
+            this.yFocus = yFocus as any;
         }
 
         // Use lowest value or 0 for Y-axis domain, whichever is less (e.g. if negative)
@@ -698,7 +704,7 @@ export class TimelineSelectorChart {
 
         yFocus.domain([minY, maxY]);
 
-        let yAxis = d3.svg.axis().scale(yFocus).orient('right').ticks(2);
+        let yAxis = d3.axisRight(yFocus).ticks(2);
 
         focus.select('.y.axis.series-y').call(yAxis);
 
@@ -730,7 +736,7 @@ export class TimelineSelectorChart {
                     return this.xFocus(d.date);
                 })
                 .attr('width', (d) => {
-                    return this.xFocus(d3.time[this.data.granularity].utc.offset(d.date, 1)) - this.xFocus(d.date);
+                    return this.xFocus(d3['utc' + this.data.granularity].offset(d.date, 1)) - this.xFocus(d.date);
                 })
                 .attr('y', (d) => {
                     return yFocus(Math.max(MIN_VALUE, d.value));
@@ -745,7 +751,7 @@ export class TimelineSelectorChart {
 
             // If type is line, render a line plot
             if (series.type === 'line') {
-                chartType = d3.svg.line()
+                chartType = d3.line()
                     .x((d: any) => {
                         return this.xFocus(d.date);
                     })
@@ -755,7 +761,7 @@ export class TimelineSelectorChart {
             } else {
                 // Otherwise, default to area, e.g. for bars whose data is too long
                 style += 'fill:' + series.color + ';';
-                chartType = d3.svg.area()
+                chartType = d3.area()
                     .x((d: any) => {
                         return this.xFocus(d.date);
                     })
@@ -823,14 +829,14 @@ export class TimelineSelectorChart {
     updateMask(): void {
         // Snap brush
         if (d3.event) {
-            let timeFunction = d3.time[this.data.granularity].utc;
+            let timeFunction = d3['utc' + this.data.granularity];
 
-            let extent0: [number, number] = this.brush.extent() as [number, number];
+            let extent0: [number, number] = this.brush.extent() as any;
             let extent1;
 
             if (typeof extent0[0] === 'undefined' || typeof extent0[1] === 'undefined') {
                 d3.select(this.element.nativeElement).call(() => {
-                    this.brush.clear();
+                    this.brushArea.call(this.brush.move, null);
                 });
             } else {
                 // if dragging, preserve the width of the extent
@@ -892,12 +898,12 @@ export class TimelineSelectorChart {
     /**
      * Returns the hover index in the given data using the given mouse event and xRange function (xContext or xFocus).
      */
-    findHoverIndexInData(data: TimelineItem[], domain: d3.time.Scale<Date, any>): number {
+    findHoverIndexInData(data: TimelineItem[], domain: d3.ScaleTime<number, any>): number {
         // To get the actual svg, you have to use [0][0]
         let mouseLocation = d3.mouse(this.svg[0][0]);
         // Subtract the margin, or else the cursor location may not match the highlighted bar
         let graph_x = domain.invert(mouseLocation[0] - DEFAULT_MARGIN);
-        let bisect = d3.bisector((d) => {
+        let bisect = d3.bisector((d: any) => {
             return d.date;
         }).right;
         return data ? bisect(data, graph_x) - 1 : -1;
@@ -920,8 +926,8 @@ export class TimelineSelectorChart {
                 datum.date <= focusData[focusData.length - 1].date) {
             if (this.data.focusGranularityDifferent) {
                 let startDate = this.data.bucketizer.roundDownBucket(datum.date);
-                let endDate = d3.time[this.data.bucketizer.getGranularity()]
-                    .utc.offset(startDate, 1);
+                let endDate = d3['utc' + this.data.bucketizer.getGranularity()]
+                    .offset(startDate, 1);
                 this.showFocusMultiHighlight(startDate, endDate);
             } else {
                 // Just draw it
@@ -985,7 +991,7 @@ export class TimelineSelectorChart {
         // TODO Create x, width, y, and height functions to combine the calculations for both the highlight bar and the other bars.
         let x = xRange(d.date);
         let MIN_VALUE = this.data.logarithmic ? 1 : 0;
-        let width = xRange(d3.time[this.data.granularity].utc.offset(d.date, 1)) - x;
+        let width = xRange(d3['utc' + this.data.granularity].offset(d.date, 1)) - x;
         let y = yRange(Math.max(MIN_VALUE, d.value));
         let height = Math.abs(yRange(d.value) - yRange(MIN_VALUE));
         highlight.attr('x', x - 1).attr('width', width + 2).attr('y', y - 1)
@@ -1005,7 +1011,7 @@ export class TimelineSelectorChart {
         if (!dateFormat) {
             dateFormat = this.dateFormats.hour;
         }
-        let date = d3.time.format.utc(dateFormat)(item.date);
+        let date = d3.utcFormat(dateFormat)(item.date);
 
         // Create the contents of the tooltip (#tl-tooltip-container is reused among the various
         // visualizations)

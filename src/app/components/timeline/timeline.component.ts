@@ -1,4 +1,3 @@
-/// <reference path="../../../../node_modules/@types/d3/index.d.ts" />
 import {
     Component,
     OnInit,
@@ -18,15 +17,13 @@ import {FieldMetaData } from '../../dataset';
 import {neonMappings} from '../../neon-namespaces';
 import * as neon from 'neon-framework';
 import * as _ from 'lodash';
+import * as d3 from 'd3';
 import {DateBucketizer} from '../bucketizers/DateBucketizer';
 import {BaseNeonComponent} from '../base-neon-component/base-neon.component';
 import {MonthBucketizer} from '../bucketizers/MonthBucketizer';
-import {Bucketizer} from '../bucketizers/Bucketizer';
 import {TimelineSelectorChart, TimelineSeries, TimelineData} from './TimelineSelectorChart';
 import {YearBucketizer} from '../bucketizers/YearBucketizer';
 import {VisualizationService} from '../../services/visualization.service';
-
-declare let d3;
 
 @Component({
     selector: 'app-timeline',
@@ -87,14 +84,14 @@ export class TimelineComponent extends BaseNeonComponent implements OnInit,
             database: this.injector.get('database', null),
             table: this.injector.get('table', null),
             dateField: this.injector.get('dateField', null),
-            granularity: this.injector.get('granularity', 'day'),
+            granularity: this.injector.get('granularity', 'Day'),
         };
         this.colorSchemeService = colorSchemeSrv;
         this.filters = [];
 
         this.active = {
             dateField: new FieldMetaData(),
-            granularity: 'day'
+            granularity: 'Day'
         };
 
         this.chartDefaults = {
@@ -133,33 +130,33 @@ export class TimelineComponent extends BaseNeonComponent implements OnInit,
             prettyName: 'Count'
         }];
         switch (this.active.granularity) {
-            case 'minute':
+            case 'Minute':
                 fields.push({
-                    columnName: 'minute',
+                    columnName: 'Minute',
                     prettyName: 'Minute'
                 });
                 /* falls through */
-            case 'hour':
+            case 'Hour':
                 fields.push({
-                    columnName: 'hour',
+                    columnName: 'Hour',
                     prettyName: 'Hour'
                 });
                 /* falls through */
-            case 'day':
+            case 'Day':
                 fields.push({
-                    columnName: 'day',
+                    columnName: 'Day',
                     prettyName: 'Day'
                 });
                 /* falls through */
-            case 'month':
+            case 'Month':
                 fields.push({
-                    columnName: 'month',
+                    columnName: 'Month',
                     prettyName: 'Month'
                 });
                 /* falls through */
-            case 'year':
+            case 'Year':
                 fields.push({
-                    columnName: 'year',
+                    columnName: 'Year',
                     prettyName: 'Year'
                 });
                 /* falls through */
@@ -256,19 +253,19 @@ export class TimelineComponent extends BaseNeonComponent implements OnInit,
         let groupBys: any[] = [];
         switch (this.active.granularity) {
             //Passthrough is intentional and expected!  falls through comments tell the linter that it is ok.
-            case 'minute':
+            case 'Minute':
                 groupBys.push(new neon.query.GroupByFunctionClause('minute', dateField, 'minute'));
             /* falls through */
-            case 'hour':
+            case 'Hour':
                 groupBys.push(new neon.query.GroupByFunctionClause('hour', dateField, 'hour'));
             /* falls through */
-            case 'day':
+            case 'Day':
                 groupBys.push(new neon.query.GroupByFunctionClause('dayOfMonth', dateField, 'day'));
             /* falls through */
-            case 'month':
+            case 'Month':
                 groupBys.push(new neon.query.GroupByFunctionClause('month', dateField, 'month'));
             /* falls through */
-            case 'year':
+            case 'Year':
                 groupBys.push(new neon.query.GroupByFunctionClause('year', dateField, 'year'));
             /* falls through */
         }
@@ -337,8 +334,7 @@ export class TimelineComponent extends BaseNeonComponent implements OnInit,
         // Start date will be the first entry, and the end date will be the last
         series.startDate = this.queryData.data[0].date;
         let lastDate = this.queryData.data[this.queryData.data.length - 1].date;
-        series.endDate = d3.time[this.active.granularity]
-            .utc.offset(lastDate, 1);
+        series.endDate = d3['utc' + this.active.granularity].offset(lastDate, 1);
 
         let filter = null;
         if (this.filters.length > 0) {
@@ -421,7 +417,7 @@ export class TimelineComponent extends BaseNeonComponent implements OnInit,
      * Zero out a date, if needed
      */
     zeroDate(date: Date) {
-        if (this.timelineData.bucketizer && this.timelineData.granularity !== 'minute') {
+        if (this.timelineData.bucketizer && this.timelineData.granularity !== 'Minute') {
             return this.timelineData.bucketizer.zeroOutDate(date);
         }
         return date;
@@ -429,21 +425,21 @@ export class TimelineComponent extends BaseNeonComponent implements OnInit,
 
     handleChangeGranularity() {
         this.timelineData.focusGranularityDifferent = false;
-        switch (this.active.granularity.toLowerCase()) {
-            case 'minute':
+        switch (this.active.granularity) {
+            case 'Minute':
                 this.timelineData.focusGranularityDifferent = true;
                 /* falls through */
-            case 'hour':
+            case 'Hour':
                 this.timelineData.bucketizer = new DateBucketizer();
                 this.timelineData.bucketizer.setGranularity(DateBucketizer.HOUR);
                 break;
-            case 'day':
+            case 'Day':
                 this.timelineData.bucketizer = new DateBucketizer();
                 break;
-            case 'month':
+            case 'Month':
                 this.timelineData.bucketizer = new MonthBucketizer();
                 break;
-            case 'year':
+            case 'Year':
                 this.timelineData.bucketizer = new YearBucketizer();
                 break;
             default:

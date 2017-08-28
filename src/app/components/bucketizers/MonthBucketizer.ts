@@ -17,7 +17,7 @@ import {Bucketizer} from './Bucketizer';
  */
 
 export class MonthBucketizer extends Bucketizer {
-    public static readonly GRANULARITY = 'month';
+    public static readonly GRANULARITY = 'Month';
 
     constructor() {
         super(MonthBucketizer.GRANULARITY);
