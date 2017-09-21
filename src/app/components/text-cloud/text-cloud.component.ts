@@ -27,6 +27,12 @@ export class TextCloudComponent extends BaseNeonComponent implements OnInit, OnD
         database: string,
         table: string,
         dataField: string,
+        configFilter: {
+            use: boolean,
+            lhs: string,
+            operator: string,
+            rhs: string
+        },
         unsharedFilterField: any,
         unsharedFilterValue: string,
         sizeField: string,
@@ -41,7 +47,8 @@ export class TextCloudComponent extends BaseNeonComponent implements OnInit, OnD
         textColor: string,
         allowsTranslations: boolean,
         filterable: boolean,
-        data: any[]
+        data: any[],
+        count: number
     };
     public emptyField: FieldMetaData = new FieldMetaData();
     public sizeAggregationTypes = [
@@ -62,6 +69,7 @@ export class TextCloudComponent extends BaseNeonComponent implements OnInit, OnD
             database: this.injector.get('database', null),
             table: this.injector.get('table', null),
             dataField: this.injector.get('dataField', null),
+            configFilter: this.injector.get('configFilter', null),
             unsharedFilterField: this.injector.get('unsharedFilterField', null),
             unsharedFilterValue: this.injector.get('unsharedFilterValue', null),
             sizeField: this.injector.get('sizeField', null),
@@ -80,9 +88,10 @@ export class TextCloudComponent extends BaseNeonComponent implements OnInit, OnD
             textColor: '#111',
             allowsTranslations: true,
             filterable: true,
-            data: []
+            data: [],
+            count: 0
         };
-        this.queryTitle = 'Text Cloud';
+        this.queryTitle = this.optionsFromConfig.title || 'Text Cloud';
     };
 
     subNgOnInit() {
@@ -121,7 +130,7 @@ export class TextCloudComponent extends BaseNeonComponent implements OnInit, OnD
     };
 
     updateTextCloudSettings() {
-        let options = new TextCloudOptions(new SizeOptions(130, 250, '%'),
+        let options = new TextCloudOptions(new SizeOptions(80, 140, '%'),
             new ColorOptions('#aaaaaa', this.active.textColor));
         this.textCloud = new TextCloud(options);
     };
@@ -192,13 +201,18 @@ export class TextCloudComponent extends BaseNeonComponent implements OnInit, OnD
         let databaseName = this.meta.database.name;
         let tableName = this.meta.table.name;
         let query = new neon.query.Query().selectFrom(databaseName, tableName);
-        let whereClause = neon.query.where(this.active.dataField.columnName, '!=', null);
-        let dataField = this.active.dataField.columnName;
-
-        // Check for an unshared filter
-        if (this.hasUnsharedFilter()) {
+        let whereClause;
+        // Checks for an unshared filter in the config file.
+        if (this.optionsFromConfig.configFilter) {
+            whereClause = neon.query.where(this.optionsFromConfig.configFilter.lhs,
+                this.optionsFromConfig.configFilter.operator,
+                this.optionsFromConfig.configFilter.rhs);
+        } else if (this.hasUnsharedFilter()) {
             whereClause = neon.query.where(this.meta.unsharedFilterField.columnName, '=', this.meta.unsharedFilterValue);
+        } else {
+            whereClause = neon.query.where(this.active.dataField.columnName, '!=', null);
         }
+        let dataField = this.active.dataField.columnName;
 
         if (this.active.sizeField.columnName === '') {
             // Normal aggregation query
@@ -217,25 +231,46 @@ export class TextCloudComponent extends BaseNeonComponent implements OnInit, OnD
         return null;
     }
 
-    onQuerySuccess(response): void {
-        let data = response.data;
-        let cloudData = data || [];
-        let useSizeField: boolean = this.active.sizeField.columnName !== '';
+    getDocCount() {
+        let databaseName = this.meta.database.name;
+        let tableName = this.meta.table.name;
+        let whereClause = this.optionsFromConfig.configFilter !== null ?
+            neon.query.where(this.optionsFromConfig.configFilter.lhs,
+                this.optionsFromConfig.configFilter.operator,
+                this.optionsFromConfig.configFilter.rhs) :
+            neon.query.where(this.active.dataField.columnName, '!=', 'null');
+        let countQuery = new neon.query.Query()
+            .selectFrom(databaseName, tableName)
+            .where(whereClause)
+            .groupBy(this.active.dataField.columnName)
+            .aggregate(neon.query['COUNT'], '*', '_docCount');
+        this.executeQuery(countQuery);
+    }
 
-        let activeData = cloudData.map((item) => {
-            item.key = item[this.active.dataField.columnName];
-            item.keyTranslated = item.key;
-            // If we have a size field, asign the value to the value field
-            if (useSizeField) {
-                item.value = item[this.active.sizeField.columnName];
+    onQuerySuccess(response): void {
+        if (response.data[0]['_docCount']) {
+            this.active.count = response.data.length;
+        } else {
+            let data = response.data;
+            let cloudData = data || [];
+            let useSizeField: boolean = this.active.sizeField.columnName !== '';
+
+            let activeData = cloudData.map((item) => {
+                item.key = item[this.active.dataField.columnName];
+                item.keyTranslated = item.key;
+                // If we have a size field, asign the value to the value field
+                if (useSizeField) {
+                    item.value = item[this.active.sizeField.columnName];
+                }
+                return item;
+            });
+            this.active = this.updateObject(this.active, 'data', activeData);
+            this.refreshVisualization();
+            this.queryTitle = this.optionsFromConfig.title || 'Text Cloud by ' + this.active.dataField.prettyName;
+            if (useSizeField && this.queryTitle !== this.optionsFromConfig.title) {
+                this.queryTitle += ' and ' + this.active.sizeField.prettyName;
             }
-            return item;
-        });
-        this.active = this.updateObject(this.active, 'data', activeData);
-        this.refreshVisualization();
-        this.queryTitle = 'Text Cloud by ' + this.active.dataField.prettyName;
-        if (useSizeField) {
-            this.queryTitle += ' and ' + this.active.sizeField.prettyName;
+            this.getDocCount();
         }
     }
 
@@ -318,7 +353,11 @@ export class TextCloudComponent extends BaseNeonComponent implements OnInit, OnD
     }
 
     getButtonText() {
-        return !this.isFilterSet() && !this.active.data.length ? 'No Data' : 'Top ' + this.active.data.length;
+        return !this.isFilterSet() && !this.active.data.length ?
+            'No Data' :
+            this.active.data.length < this.active.count ?
+                'Top ' + this.active.data.length + ' of ' + this.active.count :
+                'Total: ' + this.active.data.length;
     };
 
     getFilterData() {

@@ -20,10 +20,18 @@
 .visualization-sidenav {
     height: 100%;
     cursor: default;
+    border-radius: 15px;
 
     .header.text {
+    	font-size: 16px;
 		font-weight: bold;
-		text-transform: uppercase;
+		text-transform: capitalize;
+		color: mat-color($header-text);
+    }
+
+   	.text {
+   		font-size: 14px;
+   		color: mat-color($fade);
     }
 
     .visualization-sidenav-options {
@@ -31,7 +39,7 @@
 
         md-select, table, md-input {
             width: 100%;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
         .error-icon {
@@ -43,7 +51,7 @@
         float: right;
         padding-left: 5px;
         margin-left: 5px;
-        line-height: 18px;
+        line-height: 12px;
         border-radius: 3px;
         margin: 2px;
         background-color: mat-color($accent);
@@ -65,11 +73,12 @@
 
         .text {
             display: inline-block;
-            padding: 4px 8px;
+            padding: 4px 4px;
             cursor: pointer;
 
             &:hover {
                 text-decoration: none;
+                color: #4DBEC2 !important;
             }
         }
     }

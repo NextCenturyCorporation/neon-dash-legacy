@@ -19,11 +19,19 @@
 .visualization-sidenav {
     height: 100%;
     cursor: default;
+    border-radius: 15px;
 
     .header.text {
+        font-size: 16px;
         font-weight: bold;
-        text-transform: uppercase;
+        text-transform: capitalize;
+        color: mat-color($header-text);
     }
+   
+   .text{
+   		font-size: 14px;
+   		color: mat-color($fade);
+   	}
 
     .visualization-sidenav-options {
         min-width: 320px;
@@ -63,7 +71,7 @@
 
 .body-container {
     position: absolute;
-    top: 64px;
+    top: 56px;
     bottom: 0;
     width: 100%;
 }
@@ -78,10 +86,12 @@
 }
 
 .chart-container {
-    position: absolute;
-    width: 100%;
     top: 45px;
     bottom: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    height: 80%;
 }
 
 .chart {

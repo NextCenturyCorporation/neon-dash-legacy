@@ -63,6 +63,11 @@ export class MapComponent extends BaseLayeredNeonComponent implements OnInit,
         longitudeField: string,
         sizeField: string,
         colorField: string,
+        colorMapping: {
+            match: string,
+            label: string,
+            color: string
+        }[],
         dateField: string,
         limit: number,
         unsharedFilterField: Object,
@@ -79,11 +84,12 @@ export class MapComponent extends BaseLayeredNeonComponent implements OnInit,
         }[]
     };
     public active: {
-        layers: MapLayer[]
+        layers: MapLayer[],
         andFilters: boolean,
         limit: number,
         filterable: boolean,
         data: number[][],
+        colorMap: {},
         unusedColors: string[],
         nextColorIndex: number
     };
@@ -130,6 +136,7 @@ export class MapComponent extends BaseLayeredNeonComponent implements OnInit,
             latitudeField: this.injector.get('latitudeField', null),
             longitudeField: this.injector.get('longitudeField', null),
             colorField: this.injector.get('colorField', null),
+            colorMapping: this.injector.get('colorMapping', []),
             sizeField: this.injector.get('sizeField', null),
             dateField: this.injector.get('dateField', null),
             limit: this.injector.get('limit', 1000),
@@ -147,6 +154,7 @@ export class MapComponent extends BaseLayeredNeonComponent implements OnInit,
             filterable: true,
             data: [],
             nextColorIndex: 0,
+            colorMap: {},
             unusedColors: []
         };
 
@@ -169,7 +177,7 @@ export class MapComponent extends BaseLayeredNeonComponent implements OnInit,
             rectangle: null,
             isExact: true
         };
-        this.queryTitle = 'Map';
+        this.queryTitle = this.optionsFromConfig.title || 'Map';
         //this.addEmptyLayer();
     };
 
@@ -624,6 +632,17 @@ export class MapComponent extends BaseLayeredNeonComponent implements OnInit,
         return !isNaN(parseFloat(n)) && isFinite(n);
     }
 
+    getConfigColorForKey(key) {
+        if (typeof key !== 'string') {
+            key = String(key);
+        }
+        for (let mapping of this.optionsFromConfig.colorMapping) {
+            if (key.match(mapping.match)) {
+                return mapping.color;
+            }
+        }
+    }
+
     onQuerySuccess(layerIndex, response) {
         // TODO Need to either preprocess data to get color, size scales OR see if neon aggregations can give ranges.
         // TODO break this function into smaller bits so it is more understandable.
@@ -652,13 +671,53 @@ export class MapComponent extends BaseLayeredNeonComponent implements OnInit,
         for (let point of data) {
             let color;
             if (colorField && point[colorField]) {
+                if (this.optionsFromConfig.colorMapping.length > 0) {
+                    let colorString = this.getConfigColorForKey(point[colorField]);
+                    color = colorString ? Cesium.Color.fromCssColorString(colorString) : Cesium.Color.WHITE;
+                } else {
                     let colorString = this.colorSchemeService.getColorFor(colorField, point[colorField]).toRgb();
                     color = Cesium.Color.fromCssColorString(colorString);
+                }
             } else {
-                color = Cesium.Color.Blue;
+                color = Cesium.Color.WHITE;
             }
             let lngCoord = point[lngField];
             let latCoord = point[latField];
+
+            //This allows the map to function if the config file is a little off, i.e. if point isn't a flat dict;
+            // like if latFied holds "JSONMapping.status.geolocation.latitude", but the actual latitude value is
+            // saved at point["JSONMapping"]["status"]["geolocation"]["latitude"]
+            let lngFieldParts = lngField.split('.');
+            let latFieldParts = latField.split('.');
+            if ( !lngCoord && lngFieldParts.length > 1) {
+                lngCoord = point[lngFieldParts[0]];
+                lngFieldParts.shift();
+                while (lngFieldParts.length > 0) {
+                    if (lngFieldParts.length === 1 && lngCoord instanceof Array) {
+                        lngCoord = lngCoord.map((elem) => {
+                            return elem[lngFieldParts[0]];
+                        });
+                    } else {
+                        lngCoord = lngCoord[lngFieldParts[0]];
+                    }
+                    lngFieldParts.shift();
+                }
+            }
+            if ( !latCoord && latFieldParts.length > 1) {
+                latCoord = point[latFieldParts[0]];
+                latFieldParts.shift();
+                while (latFieldParts.length > 0) {
+                    if (latFieldParts.length === 1 && latCoord instanceof Array) {
+                        latCoord = latCoord.map((elem) => {
+                            return elem[latFieldParts[0]];
+                        });
+                    } else {
+                        latCoord = latCoord[latFieldParts[0]];
+                    }
+                    latFieldParts.shift();
+                }
+            }
+
             if (this.isNumeric(latCoord) && this.isNumeric(lngCoord)) {
                 let entity = {
                     position: Cesium.Cartesian3.fromDegrees(lngCoord, latCoord),
@@ -672,6 +731,23 @@ export class MapComponent extends BaseLayeredNeonComponent implements OnInit,
                 };
                 let en = entities.add(entity);
                 newDataIds.push(en.id);
+            } else if (latCoord instanceof Array && lngCoord instanceof Array) {
+                for (let pos = latCoord.length - 1; pos >= 0; pos--) {
+                    if (this.isNumeric(latCoord[pos]) && this.isNumeric(lngCoord[pos])) {
+                        let entity = {
+                            position: Cesium.Cartesian3.fromDegrees(lngCoord, latCoord),
+                            point: {
+                                show: true, // default
+                                color: color, // default: WHITE
+                                pixelSize: 14, // default: 1
+                                outlineColor: color === Cesium.Color.WHITE ? Cesium.Color.BLACK : color, // default: BLACK
+                                outlineWidth: 0 // default: 0
+                            }
+                        };
+                        let en = entities.add(entity);
+                        newDataIds.push(en.id);
+                    }
+                }
             }
         }
         this.active.data[layerIndex] = newDataIds;

@@ -5,7 +5,12 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",
-    "build": "ng build",
+    "prebuild": "rm -f target/neon-dash-dev.war target/neon-dash.war && mkdir -p target",
+    "build": "ng build --env=prod --base-href /neon-dash/",
+    "postbuild": "cd dist && zip -r neon-dash.war * && cd .. && mv dist/neon-dash.war target/neon-dash.war",
+    "prebuild-dev": "rm -f target/neon-dash-dev.war target/neon-dash.war && mkdir -p target",
+    "build-dev": "ng build --base-href /neon-dash/",
+    "postbuild-dev": "cd dist && zip -r neon-dash-dev.war * && cd .. && mv dist/neon-dash-dev.war target/neon-dash-dev.war",
     "lint": "ng lint",
     "test": "ng test",
     "e2e": "ng e2e",
