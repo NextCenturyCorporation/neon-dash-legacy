@@ -456,4 +456,8 @@ export const neonVisualizations: any[] = [
         name: 'Timeline',
         type: 'timeline',
         icon: 'Timeline64'
+    }, {
+        name: 'Timeline',
+        type: 'timeline-chart',
+        icon: 'Timeline64'
     }];

@@ -10,10 +10,11 @@ import { ScatterPlotComponent } from '../scatter-plot/scatter-plot.component';
 import { FilterBuilderComponent } from '../filter-builder/filter-builder.component';
 import { NeonGridItem } from '../../neon-grid-item';
 import {VisualizationService} from '../../services/visualization.service';
+import {TimelineChartComponent} from '../timeline-chartjs/timeline-chart.component';
 
 @Component({
     selector: 'app-visualization-injector',
-    entryComponents: [TextCloudComponent, BarChartComponent, LineChartComponent, MapComponent, TimelineComponent,
+    entryComponents: [TextCloudComponent, BarChartComponent, LineChartComponent, MapComponent, TimelineComponent, TimelineChartComponent,
         DataTableComponent, ScatterPlotComponent, FilterBuilderComponent],
     template: `<div #dynamicComponentContainer></div>`,
 })
@@ -76,6 +77,7 @@ export class VisualizationInjectorComponent {
             case 'lineChart': return LineChartComponent;
             case 'map': return MapComponent;
             case 'timeline': return TimelineComponent;
+            case 'timeline-chart': return TimelineChartComponent;
             case 'scatterPlot': return ScatterPlotComponent;
             case 'filterBuilder': return FilterBuilderComponent;
 

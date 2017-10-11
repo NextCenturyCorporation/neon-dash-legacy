@@ -62,6 +62,7 @@ import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { ExportControlComponent } from './components/export-control/export-control.component';
 import {AppMaterialModule} from './app.material.module';
 import {UnsharedFilterComponent} from './components/unshared-filter/unshared-filter.component';
+import {TimelineChartComponent} from './components/timeline-chartjs/timeline-chart.component';
 
 export function getAppConfig() {
     return window['appConfig'];
@@ -84,6 +85,7 @@ export function getAppConfig() {
         LegendComponent,
         MapComponent,
         TimelineComponent,
+        TimelineChartComponent,
         DataTableComponent,
         ScatterPlotComponent,
         FilterBuilderComponent,

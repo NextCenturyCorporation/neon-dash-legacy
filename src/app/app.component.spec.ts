@@ -59,6 +59,7 @@ import {AppMaterialModule} from './app.material.module';
 import {HttpModule} from '@angular/http';
 import {UnsharedFilterComponent} from './components/unshared-filter/unshared-filter.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {TimelineChartComponent} from './components/timeline-chartjs/timeline-chart.component';
 
 describe('App: NeonGtd', () => {
     let testConfig: NeonGTDConfig = new NeonGTDConfig();
@@ -79,6 +80,7 @@ describe('App: NeonGtd', () => {
                 BarChartComponent,
                 LineChartComponent,
                 TimelineComponent,
+                TimelineChartComponent,
                 LegendComponent,
                 ExportControlComponent,
                 MapComponent,

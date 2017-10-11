@@ -23,6 +23,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {AppMaterialModule} from '../../app.material.module';
 import {UnsharedFilterComponent} from '../unshared-filter/unshared-filter.component';
 import {VisualizationService} from '../../services/visualization.service';
+import {TimelineChartComponent} from '../timeline-chartjs/timeline-chart.component';
 
 describe('Component: VisualizationContainer', () => {
     let testConfig: NeonGTDConfig = new NeonGTDConfig();
@@ -38,6 +39,7 @@ describe('Component: VisualizationContainer', () => {
                 BarChartComponent,
                 LineChartComponent,
                 TimelineComponent,
+                TimelineChartComponent,
                 LegendComponent,
                 MapComponent,
                 DataTableComponent,
