@@ -32,7 +32,6 @@ import { VisualizationService } from '../../services/visualization.service';
 import * as uuid from 'node-uuid';
 import { Color } from '../../services/color-scheme.service';
 
-
 /**
  * Base component for all non-layered Neon visualizations.
  * This manages some of the lifecycle and query logic.

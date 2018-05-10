@@ -33,7 +33,6 @@ import * as yaml from 'js-yaml';
 import * as neon from 'neon-framework';
 import 'rxjs/Rx';
 
-
 const HTTP_PROVIDERS = [
     {provide: Http, useFactory:
       (xhrBackend: XHRBackend, requestOptions: RequestOptions): Http =>

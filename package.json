@@ -8,7 +8,7 @@
     "build": "ng build",
     "build-prod": "ng build --prod --build-optimizer=false",
     "lint": "ng lint",
-    "lint-fix": "ng lint -fix",
+    "lint-fix": "ng lint --fix",
     "test": "ng test",
     "e2e": "ng e2e",
     "docs": "npm run typedoc -- --options typedoc.json --exclude '**/*.spec.ts' ./src/",
