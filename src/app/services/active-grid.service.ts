@@ -17,7 +17,7 @@ import { Injectable } from '@angular/core';
 
 import { NeonGridItem } from '../neon-grid-item';
 
-import { NgGrid, NgGridConfig } from 'angular2-grid';
+import { NgGrid, NgGridConfig } from 'ngx-grid';
 import * as _ from 'lodash';
 import * as uuid from 'node-uuid';
 import { BaseNeonComponent } from '../components/base-neon-component/base-neon.component';
@@ -28,7 +28,7 @@ import { BaseLayeredNeonComponent } from '../components/base-neon-component/base
  * move an item up/down, to expand/contract an item, or to add/remove an item.
  *
  * NOTE:  The current implementation assumes a bounded grid that has a maximum number of columns allowed.
- * Additionally, angular2-grid uses 1-based row/column indexing.  So the top left corner is at position row 1, col 1.
+ * Additionally, ngx-grid uses 1-based row/column indexing.  So the top left corner is at position row 1, col 1.
  * Row and column calculations should take this into account.
  */
 @Injectable()

@@ -31,7 +31,7 @@ import * as _ from 'lodash';
 import { VisualizationService } from '../../services/visualization.service';
 import * as uuid from 'node-uuid';
 import { Color } from '../../services/color-scheme.service';
-import 'rxjs/add/operator/map';
+
 
 /**
  * Base component for all non-layered Neon visualizations.

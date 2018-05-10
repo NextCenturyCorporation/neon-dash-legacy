@@ -56,7 +56,7 @@ import { ThemesService } from './services/themes.service';
 import { VisualizationService } from './services/visualization.service';
 import { ColorSchemeService } from './services/color-scheme.service';
 
-import { NgGridModule } from 'angular2-grid';
+import { NgGridModule } from 'ngx-grid';
 
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { AppMaterialModule } from './app.material.module';
