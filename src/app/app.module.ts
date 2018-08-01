@@ -62,6 +62,7 @@ import { SampleComponent } from './components/sample/sample.component';
 import { ScatterPlotComponent } from './components/scatter-plot/scatter-plot.component';
 import { SnackBarComponent } from './components/snack-bar/snack-bar.component';
 import { StackedTimelineComponent } from './components/stacked-timeline/stacked-timeline.component';
+import { StringQueryComponent } from './components/string-query/string-query.component';
 import { TextCloudComponent } from './components/text-cloud/text-cloud.component';
 import { TimelineComponent } from './components/timeline/timeline.component';
 import { UnsharedFilterComponent } from './components/unshared-filter/unshared-filter.component';
@@ -115,6 +116,7 @@ export function getAppConfig() {
         SimpleFilterComponent,
         SnackBarComponent,
         StackedTimelineComponent,
+        StringQueryComponent,
         TextCloudComponent,
         ThumbnailGridComponent,
         TimelineComponent,

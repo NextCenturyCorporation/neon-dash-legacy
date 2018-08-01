@@ -29,6 +29,7 @@ import { NetworkGraphComponent } from '../network-graph/network-graph.component'
 import { SampleComponent } from '../sample/sample.component';
 import { ScatterPlotComponent } from '../scatter-plot/scatter-plot.component';
 import { StackedTimelineComponent } from '../stacked-timeline/stacked-timeline.component';
+import { StringQueryComponent } from '../string-query/string-query.component';
 import { TextCloudComponent } from '../text-cloud/text-cloud.component';
 import { TimelineComponent } from '../timeline/timeline.component';
 import { UnsharedFilterComponent } from '../unshared-filter/unshared-filter.component';
@@ -72,6 +73,7 @@ describe('Component: VisualizationContainer', () => {
             SampleComponent,
             ScatterPlotComponent,
             StackedTimelineComponent,
+            StringQueryComponent,
             TextCloudComponent,
             ThumbnailGridComponent,
             TimelineComponent,

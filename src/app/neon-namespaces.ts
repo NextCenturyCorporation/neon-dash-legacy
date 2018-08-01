@@ -156,6 +156,10 @@ export const neonVisualizations: any[] = [{
     type: 'stackedTimeline',
     icon: 'stacked_timeline'
 }, {
+    name: 'String Query',
+    type: 'stringQuery',
+    icon: 'create_filter'
+}, {
     name: 'Text Cloud',
     type: 'textCloud',
     icon: 'text_cloud'

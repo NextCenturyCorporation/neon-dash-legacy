@@ -27,6 +27,7 @@ import { NetworkGraphComponent } from '../network-graph/network-graph.component'
 import { SampleComponent } from '../sample/sample.component';
 import { ScatterPlotComponent } from '../scatter-plot/scatter-plot.component';
 import { StackedTimelineComponent } from '../stacked-timeline/stacked-timeline.component';
+import { StringQueryComponent } from '../string-query/string-query.component';
 import { TextCloudComponent } from '../text-cloud/text-cloud.component';
 import { TimelineComponent } from '../timeline/timeline.component';
 import { WikiViewerComponent } from '../wiki-viewer/wiki-viewer.component';
@@ -50,6 +51,7 @@ import { ThumbnailGridComponent } from '../thumbnail-grid/thumbnail-grid.compone
         SampleComponent,
         ScatterPlotComponent,
         StackedTimelineComponent,
+        StringQueryComponent,
         TextCloudComponent,
         ThumbnailGridComponent,
         TimelineComponent,
@@ -122,6 +124,7 @@ export class VisualizationInjectorComponent {
             case 'sample': return SampleComponent;
             case 'scatterPlot': return ScatterPlotComponent;
             case 'stackedTimeline': return StackedTimelineComponent;
+            case 'stringQuery': return StringQueryComponent;
             case 'textCloud': return TextCloudComponent;
             case 'thumbnailGrid': return ThumbnailGridComponent;
             case 'timeline': return TimelineComponent;

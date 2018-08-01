@@ -1,0 +1,68 @@
+<mat-sidenav-container #visualization class="visualization-sidenav" [class.neon-green-dark-theme]="themesService.getCurrentTheme().id === 'neon-green-dark-theme'">
+    <mat-toolbar class="neon-toolbar-thin" color="header" layout-align="space-between center" flex>
+        <div #headerText class="header text pull-left" [matTooltip]="options.title" tooltip-position="below">{{ options.title }}</div>
+
+        <span class="fill-remaining"></span>
+
+        <button mat-icon-button aria-label="Reset" matTooltip="Reset" tooltip-position="below"
+                (click)="resetFilterBuilder()">
+            <mat-icon>delete_sweep</mat-icon>
+        </button>
+
+    </mat-toolbar>
+
+    <div class="body-container">
+        <div class="main-container">
+            <div class="clause-container" *ngFor="let clause of clauses">
+                <div class="clause-form-container">
+                    <mat-form-field class="neon-form-field-flex-5 neon-form-field">
+                        <mat-select placeholder="Database" [(ngModel)]="clause.changeDatabase"
+                                    required="true" (ngModelChange)="handleChangeDatabaseOfClause(clause)"
+                                    [disabled]="clause.databases.length < 2">
+                            <mat-option *ngFor="let database of clause.databases" [value]="database">{{ database.prettyName }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field class="neon-form-field-flex-5 neon-form-field">
+                        <mat-select placeholder="Table" [(ngModel)]="clause.changeTable"
+                                    required="true" (ngModelChange)="handleChangeTableOfClause(clause)"
+                                    [disabled]="clause.tables.length < 2">
+                            <mat-option *ngFor="let table of clause.tables" [value]="table">{{ table.prettyName }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+<!--
+                    <mat-form-field class="neon-form-field-flex-3 neon-form-field">
+                        <mat-select placeholder="Field" [(ngModel)]="clause.changeField"
+                                    required="true" (ngModelChange)="handleChangeFieldOfClause(clause)"
+                                    [disabled]="clause.fields.length == 0">
+                            <mat-option *ngFor="let field of clause.fields" [value]="field">{{ field.prettyName }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+-->
+
+                    <mat-form-field class="neon-form-field-flex-2 neon-form-field">
+                        <input matInput placeholder="Query" [(ngModel)]="clause.value" (input)="handleChangeDataOfClause(clause)" (keyup.enter)="activateClause(clause)">
+                    </mat-form-field>
+                </div>
+
+                <div class="clause-button-container">
+                    <button mat-icon-button class="neon-icon-button clause-button" (click)="activateClause(clause)"
+                            [disabled]="!validateClause(clause)" matTooltip="Update Filter" tooltip-position="below" *ngIf="!clause.active">
+                        <mat-icon class="neon-icon">refresh</mat-icon>
+                    </button>
+
+                    <button mat-icon-button class="neon-icon-button clause-button active" (click)="activateClause(clause)"
+                            matTooltip="Filter is Active" tooltip-position="below" *ngIf="clause.active">
+                        <mat-icon class="neon-icon">check_circle</mat-icon>
+                    </button>
+
+                    <button mat-icon-button class="neon-icon-button clause-button" (click)="removeClause(clause)"
+                            matTooltip="Remove Filter" tooltip-position="below">
+                        <mat-icon class="neon-icon">delete</mat-icon>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</mat-sidenav-container>
