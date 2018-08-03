@@ -71,7 +71,7 @@ export class AppComponent implements AfterViewInit, OnInit, OnDestroy {
         cascade: 'up',
         fix_to_grid: true,
         limit_to_screen: true,
-        resize_directions: ["bottomright", "bottomleft", "right", "left", "bottom"]
+        resize_directions: ['bottomright', 'bottomleft', 'right', 'left', 'bottom']
     };
 
     public projectTitle: string = 'Neon';

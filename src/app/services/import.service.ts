@@ -86,9 +86,7 @@ export class ImportService {
 
                 // Find and save in pair all objectFTPairs that are associated with pair and save the index to remove later
                 pair.keys.forEach((key) => {
-                    let indx = _.findIndex(toReturn, {
-                        name: pair.name + '__' + key
-                    });
+                    let indx = _.findIndex(toReturn, pair.name + '__' + key);
                     objectFTPairs.push({
                         name: key,
                         type: toReturn[indx].type
@@ -104,9 +102,7 @@ export class ImportService {
             } else if (pair.keys && pair.keys.length && pair.type !== 'OBJECT') {
                 // Find all objectFTPairs that are associated with pair and save the index to remove later
                 pair.keys.forEach((key) => {
-                    let indx = _.findIndex(toReturn, {
-                        name: pair.name + '__' + key
-                    });
+                    let indx = _.findIndex(toReturn, pair.name + '__' + key);
                     toRemoveIndices.push(indx);
                 });
 

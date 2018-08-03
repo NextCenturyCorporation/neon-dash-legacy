@@ -15,10 +15,10 @@
  */
 import { Injectable, Inject } from '@angular/core';
 import { Http } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
 import * as _ from 'lodash';
 import { NeonGTDConfig } from '../neon-gtd-config';
 import { ConnectionService } from './connection.service';
+import { throwError as observableThrowError, Observable } from 'rxjs';
 
 @Injectable()
 export class TranslationService {
@@ -181,7 +181,7 @@ export class TranslationService {
                         return response;
                     })
                     .catch((response) =>
-                        Observable.throw({
+                        observableThrowError({
                             message: response.data.error.message,
                             reason: this.concatErrorResponses(response.data.error.errors)
                         })
@@ -244,7 +244,7 @@ export class TranslationService {
                 });
                 return this.apis[this.chosenApi].languages;
             })
-            .catch((error) => Observable.throw({
+            .catch((error) => observableThrowError({
                 message: error.data.error.message,
                 reason: this.concatErrorResponses(error.data.error.errors)
             }));

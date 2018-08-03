@@ -76,5 +76,5 @@
 
 .app-simple-snack-center {
     flex: 0 0 auto;
-    font-family: $mat-font-family;
+    font-family: mat-font-family(mat-typography-config());
 }
