@@ -32,7 +32,7 @@ import { VisualizationService } from '../../services/visualization.service';
 import { EMPTY_FIELD, FieldMetaData, TableMetaData, DatabaseMetaData } from '../../dataset';
 import * as neon from 'neon-framework';
 import * as _ from 'lodash';
-import * as uuid from 'node-uuid';
+import * as uuid from 'uuid/v4';
 
 /**
  * Manages configurable options for one layer.
@@ -282,7 +282,7 @@ export abstract class BaseLayeredNeonComponent implements OnInit, OnDestroy {
         this.messenger = new neon.eventing.Messenger();
         this.doExport = this.doExport.bind(this);
         this.getBindings = this.getBindings.bind(this);
-        this.id = uuid.v4();
+        this.id = uuid();
     }
 
     /**

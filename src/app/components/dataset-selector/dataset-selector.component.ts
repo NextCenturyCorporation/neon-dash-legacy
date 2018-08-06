@@ -24,7 +24,7 @@ import { neonVisualizationMinPixel } from '../../neon-namespaces';
 import * as neon from 'neon-framework';
 
 import * as _ from 'lodash';
-import * as uuid from 'node-uuid';
+import * as uuid from 'uuid/v4';
 
 export interface CustomTable {
     table: TableMetaData;
@@ -168,7 +168,7 @@ export class DatasetSelectorComponent implements OnInit, OnDestroy {
                     }
 
                     for (let dashboard of message.dashboard) {
-                        dashboard.id = uuid.v4();
+                        dashboard.id = uuid();
                     }
                     this.activeGridService.setGridItems(message.dashboard);
                     this.activeDatasetChanged.emit(this.activeDataset);
@@ -250,7 +250,7 @@ export class DatasetSelectorComponent implements OnInit, OnDestroy {
                 dragHandle: '.drag-handle',
                 borderSize: 10
             };
-            item.id = uuid.v4();
+            item.id = uuid();
             this.activeGridService.addItem(item);
         }
 
@@ -272,7 +272,7 @@ export class DatasetSelectorComponent implements OnInit, OnDestroy {
         this.messenger.clearFilters();
 
         _.each(this.customVisualizations, (visualization) => {
-            let id: string = uuid.v4();
+            let id: string = uuid();
             let layout: any = {
                 id: id,
                 bindings: {},

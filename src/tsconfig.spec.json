@@ -16,11 +16,10 @@
     "types": [
       "jasmine",
       "node",
-      "node-uuid"
+      "uuid"
     ],
     "typeRoots": [
-        "../node_modules/@types",
-        "./vendor-types"
+      "../node_modules/@types"
     ]
   },
   "files": [

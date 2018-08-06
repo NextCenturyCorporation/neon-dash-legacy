@@ -31,7 +31,7 @@ import { VisualizationService } from '../../services/visualization.service';
 
 import { EMPTY_FIELD, FieldMetaData, TableMetaData, DatabaseMetaData } from '../../dataset';
 import * as neon from 'neon-framework';
-import * as uuid from 'node-uuid';
+import * as uuid from 'uuid/v4';
 import * as _ from 'lodash';
 
 /**
@@ -297,7 +297,7 @@ export abstract class BaseNeonComponent implements OnInit, OnDestroy {
         this.doExport = this.doExport.bind(this);
         this.getBindings = this.getBindings.bind(this);
         // Let the ID be a UUID
-        this.id = uuid.v4();
+        this.id = uuid();
     }
 
     /**

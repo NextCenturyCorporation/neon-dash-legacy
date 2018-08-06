@@ -20,7 +20,7 @@ import { DatasetService } from '../../services/dataset.service';
 import { SimpleFilter } from '../../dataset';
 import { BehaviorSubject } from 'rxjs';
 import * as neon from 'neon-framework';
-import * as uuid from 'node-uuid';
+import * as uuid from 'uuid/v4';
 
 @Component({
     selector: 'app-simple-filter',
@@ -33,7 +33,7 @@ export class SimpleFilterComponent {
     public simpleFilter = new BehaviorSubject<SimpleFilter>(undefined);
     public filterId = new BehaviorSubject<string>(undefined);
 
-    private id = uuid.v4();
+    private id = uuid();
     private messenger = new neon.eventing.Messenger();
 
     constructor(private datasetService: DatasetService, private filterService: FilterService, public themesService: ThemesService) {

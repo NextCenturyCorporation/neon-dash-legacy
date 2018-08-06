@@ -18,7 +18,7 @@ import * as neon from 'neon-framework';
 
 import { ErrorNotificationService } from './error-notification.service';
 import { DatasetService } from './dataset.service';
-import * as uuid from 'node-uuid';
+import * as uuid from 'uuid/v4';
 import * as _ from 'lodash';
 
 export class ServiceFilter {
@@ -321,7 +321,7 @@ export class FilterService {
     }
 
     protected createFilterId(database: string, table: string) {
-        return database + '-' + table + '-' + uuid.v4();
+        return database + '-' + table + '-' + uuid();
     }
 
     protected createChildrenFromRelations(filter: neon.query.Filter,
