@@ -23,7 +23,7 @@ import { MatDialog, MatDialogConfig, MatDialogRef, MatSnackBar, MatToolbar } fro
 import { ActiveGridService } from './services/active-grid.service';
 import { DatasetService } from './services/dataset.service';
 import { ThemesService } from './services/themes.service';
-import { NgGrid, NgGridConfig } from 'ngx-grid';
+import { NgGrid, NgGridConfig } from 'angular2-grid';
 import { NeonGridItem } from './neon-grid-item';
 import { VisualizationContainerComponent } from './components/visualization-container/visualization-container.component';
 import { AddVisualizationComponent } from './components/add-visualization/add-visualization.component';
@@ -142,7 +142,7 @@ export class AppComponent implements AfterViewInit, OnInit, OnDestroy {
     ngAfterViewInit() {
         // child is set
         /* NOTE:
-         * There was an issue with Angular Material beta 12 and ngx-grid,
+         * There was an issue with Angular Material beta 12 and angular2-grid,
          * where the grid would initially be multiple times larger than the rest of the page
          * until the window has been resized.
          * To work around this, trigger a resize event in the grid on page load so that it measures

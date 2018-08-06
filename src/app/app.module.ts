@@ -23,7 +23,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 import 'hammerjs';
 
-import { NgGridModule } from 'ngx-grid';
+import { NgGridModule } from 'angular2-grid';
 
 import { ActiveGridService } from './services/active-grid.service';
 import { ColorSchemeService } from './services/color-scheme.service';
