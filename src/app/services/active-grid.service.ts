@@ -19,7 +19,7 @@ import { NeonGridItem } from '../neon-grid-item';
 
 import { NgGrid, NgGridConfig } from 'angular2-grid';
 import * as _ from 'lodash';
-import * as uuid from 'node-uuid';
+import * as uuid from 'uuid/v4';
 import { BaseNeonComponent } from '../components/base-neon-component/base-neon.component';
 import { BaseLayeredNeonComponent } from '../components/base-neon-component/base-layered-neon.component';
 
@@ -178,7 +178,7 @@ export class ActiveGridService {
         let maxRow: number = this.gridConfig.max_rows;
 
         let newItem = _.cloneDeep(item);
-        newItem.id = uuid.v4();
+        newItem.id = uuid();
         newItem.gridItemConfig = {
             col: 1,
             row: 1,

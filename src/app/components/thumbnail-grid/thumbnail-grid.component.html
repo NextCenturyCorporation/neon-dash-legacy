@@ -15,8 +15,8 @@
         </button>
     </mat-toolbar>
 
-    <mat-sidenav #optionsMenu align="end" class="visualization-sidenav-options">
-        <mat-card align="left">
+    <mat-sidenav #optionsMenu position="end" class="visualization-sidenav-options">
+        <mat-card position="left">
             <mat-card-content>
                 <div *ngIf="errorMessage">
                     <label class="icon-with-text error-message" [matTooltip]="errorMessage" tooltip-position="below">
@@ -71,6 +71,14 @@
 
                 <mat-form-field>
                     <mat-select placeholder="Category Field" [(ngModel)]="options.categoryField" required="false" (ngModelChange)="handleChangeData()" [disabled]="options.fields.length < 1">
+                        <mat-option [value]="emptyField">(None)</mat-option>
+                        <mat-option *ngFor="let field of options.fields" [value]="field">{{ field.prettyName }}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <p></p>
+
+                <mat-form-field>
+                    <mat-select placeholder="Comparison Field" [(ngModel)]="options.compareField" required="false" (ngModelChange)="handleChangeData()" [disabled]="options.fields.length < 1">
                         <mat-option [value]="emptyField">(None)</mat-option>
                         <mat-option *ngFor="let field of options.fields" [value]="field">{{ field.prettyName }}</mat-option>
                     </mat-select>
@@ -152,6 +160,16 @@
 
                 <mat-form-field>
                     <input matInput placeholder="Border" [(ngModel)]="options.border" required="false">
+                </mat-form-field>
+                <p></p>
+
+                <mat-form-field>
+                    <input matInput placeholder="Border By Comparison To Category" [(ngModel)]="options.borderCompareValue" required="false">
+                </mat-form-field>
+                <p></p>
+
+                <mat-form-field>
+                    <input matInput placeholder="Border Percent Threshold" [(ngModel)]="options.borderPercentThreshold" required="false">
                 </mat-form-field>
                 <p></p>
 

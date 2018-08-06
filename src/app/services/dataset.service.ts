@@ -16,9 +16,9 @@
 import { Inject, Injectable } from '@angular/core';
 import * as neon from 'neon-framework';
 
-import { Dataset, DatasetOptions, DatabaseMetaData, TableMetaData, TableMappings, FieldMetaData, Relation } from '../dataset';
-import { Subscription, Observable } from 'rxjs/Rx';
+import { Dataset, DatasetOptions, DatabaseMetaData, TableMetaData, TableMappings, FieldMetaData } from '../dataset';
 import { NeonGTDConfig } from '../neon-gtd-config';
+import { Observable, Subscription, interval } from 'rxjs';
 import * as _ from 'lodash';
 
 @Injectable()
@@ -168,7 +168,7 @@ export class DatasetService {
         }
         if (this.dataset.options.requeryInterval) {
             let delay = Math.max(0.5, this.dataset.options.requeryInterval) * 60000;
-            this.updateInterval = Observable.interval(delay);
+            this.updateInterval = interval(delay);
             this.updateSubscription = this.updateInterval.subscribe(() => {
                 this.publishUpdateData();
             });

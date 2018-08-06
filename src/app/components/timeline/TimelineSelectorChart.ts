@@ -53,7 +53,7 @@ export class TimelineSeries {
     public data: TimelineItem[] = DEFAULT_DATA;
     public focusData: TimelineItem[] = [];
     public name: string = 'Default';
-    public type: string= 'bar';
+    public type: string = 'bar';
     public options: Object = {};
     public startDate: Date = DEFAULT_DATA[0].date;
     public endDate: Date = DEFAULT_DATA[1].date;

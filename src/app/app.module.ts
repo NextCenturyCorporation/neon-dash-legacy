@@ -13,7 +13,7 @@
  * limitations under the License.
  *
  */
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, KeyValueDiffers, KeyValueDifferFactory, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
@@ -43,6 +43,7 @@ import { AboutNeonComponent } from './components/about-neon/about-neon.component
 import { AddVisualizationComponent } from './components/add-visualization/add-visualization.component';
 import { AnnotationViewerComponent } from './components/annotation-viewer/annotation-viewer.component';
 import { AppComponent } from './app.component';
+import { AggregationComponent } from './components/aggregation/aggregation.component';
 import { BarChartComponent } from './components/bar-chart/bar-chart.component';
 import { ChartComponent } from './components/chart/chart.component';
 import { ConfigEditorComponent } from './components/config-editor/config-editor.component';
@@ -92,6 +93,7 @@ export function getAppConfig() {
         AddVisualizationComponent,
         AnnotationViewerComponent,
         AppComponent,
+        AggregationComponent,
         BarChartComponent,
         ChartComponent,
         ConfigEditorComponent,
